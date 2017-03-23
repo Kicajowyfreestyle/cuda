@@ -1,2 +1,2 @@
-lol: vectorAdd.cu
-	nvcc -o lol vectorAdd.cu
+mapLogarithm: mapLogarithm.cu
+	nvcc -o mapLogarithm mapLogarithm.cu
