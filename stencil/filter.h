@@ -2,7 +2,7 @@
 #include <stdio.h>
 
 __global__
-void stencil(float *x, float *y, int xWidth, int xHeight, float **filter, int filterSize);
+void stencil(float *x, float *y, int xWidth, int xHeight, float *filter, int filterSize, float filterSum);
 
 void cudaSquareFilter(float **x, int xWidth, int xHeight, float **filter, int filterSize);
 

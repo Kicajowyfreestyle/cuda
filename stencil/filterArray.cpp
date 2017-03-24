@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <cstdlib>
 #include <ctime>
-#include "map.h"
+#include "filter.h"
 
 int main(void)
 {
@@ -25,6 +25,7 @@ int main(void)
     printf("\n");
   }
 
+  // create filter
   for (int i = 0; i < filterSize; i++) {
     filter[i] = (float*)malloc(filterSize*sizeof(float));
     for (int k = 0; k < filterSize; k++) {
@@ -46,9 +47,7 @@ int main(void)
   }
 
 
-
-
-    // array initialization & print
+  // free allocated memory
   for (int i = 0; i < N; i++) {
     free(h_x[i]);
   }
