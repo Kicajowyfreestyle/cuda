@@ -19,7 +19,12 @@ void cudaMapLog(float *x, int n){
     cudaMemcpy(d_x, x, n*sizeof(float), cudaMemcpyHostToDevice);
     cudaMemcpy(d_y, x, n*sizeof(float), cudaMemcpyHostToDevice);
 
-    mapLog<<<n, 1>>>(d_x, d_y);
+    // find good division
+    int division = 2;
+    for(;division<=1024; division = division<<1)
+      if(n%division) break;
+
+    mapLog<<<n*2/division, division/2>>>(d_x, d_y);
 
     cudaMemcpy(x, d_y, n*sizeof(float), cudaMemcpyDeviceToHost);
 
@@ -33,7 +38,7 @@ int main(void)
   srand(time(NULL));
 
   float *h_x;
-  int N=3;
+  int N=1024;
 
   // allocate memory on host
   h_x = (float*)malloc(N*sizeof(float));
