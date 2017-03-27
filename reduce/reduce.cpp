@@ -1,13 +1,5 @@
 #include "reduce.h"
 
-// TODO: 
-//  - shared memory in functions
-//  - function to fill data to next power of two with neutral element
-//  - adjust other GPU programs to get argument N from comandline parameter
-//  - add some time measurement
-//  - better division for reducing big arrays
-
-
 ///////////////////////////////////////////////////////////
 // Device functions
 ///////////////////////////////////////////////////////////
