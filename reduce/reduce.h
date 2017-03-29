@@ -15,6 +15,8 @@ void reduceMax(float *x, float *y, int *n);
 __global__
 void reduceSum(float *x, float *y, int *n);
 
+__global__
+void reduceSumSharedAtom(float *x, float *y);
 
 ///////////////////////////////////////////////////////////
 // Host functions

@@ -49,6 +49,24 @@ void reduceSum(float *x, float *y, int *n)
     *y = x[0];
 }
 
+__global__
+void reduceSumSharedAtom(float *x, float *y)
+{
+  int id = blockIdx.x*blockDim.x + threadIdx.x;
+  int tid = threadIdx.x;
+  extern __shared__ float s_x[];
+  s_x[tid] = x[id];
+  __syncthreads();
+  for(int i=blockDim.x/2; i>0; i>>=1){
+    if(tid<i){
+      s_x[tid] += s_x[tid+i];
+    }
+    __syncthreads();
+  }
+  if(tid==0)
+    atomicAdd(y, s_x[0]);
+}
+
 
 ///////////////////////////////////////////////////////////
 // Host functions
@@ -58,13 +76,14 @@ float cudaReduce(float *x, int n, std::string functionName){
     float *d_x, *d_y, *h_y;
     int *d_n;
     h_y = (float*)malloc(sizeof(float));
+    *h_y = 0;
     // allocate memory on device
     cudaMalloc(&d_x, n*sizeof(float));
     cudaMalloc(&d_y, sizeof(float));
     cudaMalloc(&d_n, sizeof(int));
     // copy arrays to devie
     cudaMemcpy(d_x, x, n*sizeof(float), cudaMemcpyHostToDevice);
-    //cudaMemcpy(d_y, x[0], sizeof(float), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_y, h_y, sizeof(float), cudaMemcpyHostToDevice);
     cudaMemcpy(d_n, &n, sizeof(int), cudaMemcpyHostToDevice);
 
     // find good division
@@ -78,7 +97,8 @@ float cudaReduce(float *x, int n, std::string functionName){
   		reduceMax<<<n/(division*2), division>>>(d_x, d_y, d_n);
   	}
   	else if(functionName == "sum"){
-  		reduceSum<<<n/(division*2), division>>>(d_x, d_y, d_n);
+  		//reduceSum<<<n/(division), division, division*sizeof(float)>>>(d_x, d_y, d_n);
+                reduceSumSharedAtom<<<n/division, division, division*sizeof(float)>>>(d_x, d_y);
   	}
 
     // copy array from device to host
