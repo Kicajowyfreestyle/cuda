@@ -22,8 +22,12 @@ int main(int argc, char* argv[])
     //printf("%f\n", h_x[i]);
   }
 
+  // max/min test case
+  h_x[N-2]=10;
+
+
   // reduce function
-  float rsp = cudaReduce(h_x, N, "sum");
+  float rsp = cudaReduce(h_x, N, "max");
   printf("%f\n", rsp);
 
   free(h_x);

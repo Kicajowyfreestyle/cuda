@@ -5,13 +5,12 @@
 ///////////////////////////////////////////////////////////
 
 __global__
-void reduceMin(float *x, float *y, int *n)
+void reduceMin(float *x, float *y) // use only if array length is smaller or equal than 2^10
 {
   int id = blockIdx.x*blockDim.x + threadIdx.x;
-  int d_n = *n;
-  for(int i=d_n/2; i>0; i>>=1){
+  for(int i=blockDim.x/2; i>0; i>>=1){
     if(id<i){
-      x[id] = (x[id]<x[id+i])?x[id]:x[id+i];
+      x[id] = min(x[id], x[id+i]);//(x[id]<x[id+i])?x[id]:x[id+i];
     }
     __syncthreads();
   }
@@ -20,13 +19,38 @@ void reduceMin(float *x, float *y, int *n)
 }
 
 __global__
-void reduceMax(float *x, float *y, int *n)
+void reduceMinShared(float *x, float *y) // use only if array length is smaller or equal than 2^25
+{
+  int idx = blockIdx.x*blockDim.x + threadIdx.x;
+  int idy = blockIdx.y*blockDim.y + threadIdx.y;
+  int id = gridDim.x*blockDim.x*idy+idx;
+
+  int tidx = threadIdx.x;
+  int tidy = threadIdx.y;
+  int tid = blockDim.x*tidy+tidx;
+  extern __shared__ float s_x[];
+  s_x[tid] = x[id];
+  __syncthreads();
+  for(int i=blockDim.x*blockDim.y/2; i>0; i>>=1){
+    if(tid<i){
+       s_x[tid] = min(s_x[tid], s_x[tid+i]);
+    }
+    __syncthreads();
+  }
+  if(tid==0){
+    int blockZeroElementId = gridDim.x*blockIdx.y+blockIdx.x;
+    y[blockZeroElementId] = min(s_x[0], y[blockZeroElementId]);
+  }
+}
+
+
+__global__
+void reduceMax(float *x, float *y) // use only if array length is smaller or equal than 2^10
 {
   int id = blockIdx.x*blockDim.x + threadIdx.x;
-  int d_n = *n;
-  for(int i=d_n/2; i>0; i>>=1){
+  for(int i=blockDim.x/2; i>0; i>>=1){
     if(id<i){
-      x[id] = (x[id]>x[id+i])?x[id]:x[id+i];
+      x[id] = max(x[id], x[id+i]);
     }
     __syncthreads();
   }
@@ -35,7 +59,33 @@ void reduceMax(float *x, float *y, int *n)
 }
 
 __global__
-void reduceSum(float *x, float *y) // use only if array length is smaller than 2^10
+void reduceMaxShared(float *x, float *y) // use only if array length is smaller or equal than 2^25
+{
+  int idx = blockIdx.x*blockDim.x + threadIdx.x;
+  int idy = blockIdx.y*blockDim.y + threadIdx.y;
+  int id = gridDim.x*blockDim.x*idy+idx;
+
+  int tidx = threadIdx.x;
+  int tidy = threadIdx.y;
+  int tid = blockDim.x*tidy+tidx;
+  extern __shared__ float s_x[];
+  s_x[tid] = x[id];
+  __syncthreads();
+  for(int i=blockDim.x*blockDim.y/2; i>0; i>>=1){
+    if(tid<i){
+       s_x[tid] = max(s_x[tid], s_x[tid+i]);
+    }
+    __syncthreads();
+  }
+  if(tid==0){
+    int blockZeroElementId = gridDim.x*blockIdx.y+blockIdx.x;
+    y[blockZeroElementId] = max(s_x[0], y[blockZeroElementId]);
+  }
+}
+
+
+__global__
+void reduceSum(float *x, float *y) // use only if array length is smaller or equal than 2^10
 {
   int id = blockIdx.x*blockDim.x + threadIdx.x;
   for(int i=blockDim.x/2; i>0; i>>=1){
@@ -49,7 +99,7 @@ void reduceSum(float *x, float *y) // use only if array length is smaller than 2
 }
 
 __global__
-void reduceSumSharedAtom(float *x, float *y) // use only if array length is smaller than 2^25
+void reduceSumSharedAtom(float *x, float *y) // use only if array length is smaller or equal than 2^25
 {
   int id = blockIdx.x*blockDim.x + threadIdx.x;
   int tid = threadIdx.x;
@@ -67,7 +117,7 @@ void reduceSumSharedAtom(float *x, float *y) // use only if array length is smal
 }
 
 __global__
-void reduceSumShared(float *x, float *y) // use only if array length is smaller than 2^25
+void reduceSumShared(float *x, float *y) // use only if array length is smaller or equal than 2^25
 {
   int idx = blockIdx.x*blockDim.x + threadIdx.x;
   int idy = blockIdx.y*blockDim.y + threadIdx.y;
@@ -94,12 +144,13 @@ void reduceSumShared(float *x, float *y) // use only if array length is smaller 
 // Host functions
 ///////////////////////////////////////////////////////////
 
-float cudaReduce(float *x, long long int n, std::string functionName){
+float cudaReduce(float *x, long long int n, std::string functionName)
+{
   float *d_x;
   float y;
 
   // find good division - std::min didnt accepted long long
-  int division = (n>1024)?1024:n;
+  int division = min(n, 1024);
     
   // allocate memory on device
   cudaMalloc(&d_x, n*sizeof(float));
@@ -107,16 +158,19 @@ float cudaReduce(float *x, long long int n, std::string functionName){
   cudaMemcpy(d_x, x, n*sizeof(float), cudaMemcpyHostToDevice);
 
   // choose funtion
+  // ommented out lines left for performace test
   if(functionName == "min"){
-  	//reduceMin<<<n/(division*2), division>>>(d_x, d_y, d_n);
+  	//reduceMin<<<n/division, division>>>(d_x, d_x);
+    reduceMinSharedWrapper(n, division, d_x, d_x);
   }
   else if(functionName == "max"){
-  	//reduceMax<<<n/(division*2), division>>>(d_x, d_y, d_n);
+  	//reduceMax<<<n/division, division>>>(d_x, d_x);
+    reduceMaxSharedWrapper(n, division, d_x, d_x);
   }
   else if(functionName == "sum"){
-  	reduceSum<<<n/(division), division, division*sizeof(float)>>>(d_x, d_x); // use only if array length is smaller than 2^10
+  	//reduceSum<<<n/(division), division>>>(d_x, d_x); // use only if array length is smaller or equal than 2^10
     //reduceSumSharedAtom<<<n/division, division, division*sizeof(float)>>>(d_x, d_y);
-    //reduceSumSharedWrapper(n, division, d_x);
+    reduceSumSharedWrapper(n, division, d_x, d_x);
   }
 
   // copy array from device to host
@@ -128,12 +182,51 @@ float cudaReduce(float *x, long long int n, std::string functionName){
   return y;
 }
 
-void reduceSumSharedWrapper(long long int n, int division, float *d_x){
+// TODO: make a class with wirtual method from that
+
+void reduceSumSharedWrapper(long long int n, int division, float *d_x, float *d_y)
+{
   while(n>0){
     int dzielnik = n/division;
     dim3 lol (n/(division*dzielnik), dzielnik, 1);
-    reduceSumShared<<<lol, division, division*sizeof(float)>>>(d_x, d_x);
+    reduceSumShared<<<lol, division, division*sizeof(float)>>>(d_x, d_y);
     n>>=10;
     division = (n>1024)?1024:n;
   }
+}
+
+void reduceMinSharedWrapper(long long int n, int division, float *d_x, float *d_y)
+{
+  while(n>0){
+    int dzielnik = n/division;
+    dim3 lol (n/(division*dzielnik), dzielnik, 1);
+    reduceMinShared<<<lol, division, division*sizeof(float)>>>(d_x, d_y);
+    n>>=10;
+    division = (n>1024)?1024:n;
+  }
+}
+
+void reduceMaxSharedWrapper(long long int n, int division, float *d_x, float *d_y)
+{
+  while(n>0){
+    int dzielnik = n/division;
+    dim3 lol (n/(division*dzielnik), dzielnik, 1);
+    reduceMaxShared<<<lol, division, division*sizeof(float)>>>(d_x, d_y);
+    n>>=10;
+    division = (n>1024)?1024:n;
+  }
+}
+
+///////////////////////////////////////////////////////////
+// Tool functions
+///////////////////////////////////////////////////////////
+
+template <typename T>
+T min(T a, T b){
+  return (a<b)?a:b;
+}
+
+template <typename T>
+T max(T a, T b){
+  return (a>b)?a:b;
 }
