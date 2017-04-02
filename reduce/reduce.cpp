@@ -221,12 +221,12 @@ void reduceMaxSharedWrapper(long long int n, int division, float *d_x, float *d_
 // Tool functions
 ///////////////////////////////////////////////////////////
 
-template <typename T>
-T min(T a, T b){
-  return (a<b)?a:b;
-}
+// template <typename T>
+// T min(T a, T b){
+//   return (a<b)?a:b;
+// }
 
-template <typename T>
-T max(T a, T b){
-  return (a>b)?a:b;
-}
+// template <typename T>
+// T max(T a, T b){
+//   return (a>b)?a:b;
+// }
