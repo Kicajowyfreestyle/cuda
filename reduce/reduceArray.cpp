@@ -9,7 +9,8 @@ int main(int argc, char* argv[])
   srand(time(NULL));
 
   float *h_x;
-  long long int N=atoi(argv[1]);//128;
+  long long int N=atoi(argv[1]);
+  std::string op = argv[2];
 
   // allocate memory on host
   h_x = (float*)malloc(N*sizeof(float));
@@ -23,11 +24,14 @@ int main(int argc, char* argv[])
   }
 
   // max/min test case
-  // h_x[N-2]=10;
+  if(op=="min")
+    h_x[N-2]=-10;
+  else if(op=="max")
+    h_x[N-2]=10;
 
 
   // reduce function
-  float rsp = cudaReduce(h_x, N, "sum");
+  float rsp = cudaReduce(h_x, N, op);
   printf("%f\n", rsp);
 
   free(h_x);

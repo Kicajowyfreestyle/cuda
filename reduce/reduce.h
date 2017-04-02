@@ -1,6 +1,7 @@
 #include <cmath>
 #include <iostream>
 #include <algorithm>
+#include <limits>
 
 ///////////////////////////////////////////////////////////
 // Device functions
@@ -32,21 +33,25 @@ void reduceSumShared(float *x, float *y);
 // Host functions
 ///////////////////////////////////////////////////////////
 
-float cudaReduce(float *x, long long int n, std::string functionName);
+float cudaReduce(float *x, long long int numberOfElements, std::string functionName);
 
-void reduceSumSharedWrapper(long long int n, int division, float *d_x, float *d_y);
+void reduceSumSharedWrapper(long long int numberOfElements, int division, float *d_x, float *d_y);
 
-void reduceMinSharedWrapper(long long int n, int division, float *d_x, float *d_y);
+void reduceMinSharedWrapper(long long int numberOfElements, int division, float *d_x, float *d_y);
 
-void reduceMaxSharedWrapper(long long int n, int division, float *d_x, float *d_y);
+void reduceMaxSharedWrapper(long long int numberOfElements, int division, float *d_x, float *d_y);
 
 ///////////////////////////////////////////////////////////
 // Tool functions
 ///////////////////////////////////////////////////////////
 
-#define max(a,b) (((a) > (b)) ? (a) : (b))
+#define MAX(a,b) (((a) > (b)) ? (a) : (b))
 
-#define min(a,b) (((a) < (b)) ? (a) : (b))
+#define MIN(a,b) (((a) < (b)) ? (a) : (b))
+
+void fillWithNeutral(float *array, long long int& numberOfElements, float neutralElement);
+
+long long int nextPowerOf2(long long int n);
 
 // template <typename T>
 // T min(T a, T b);
