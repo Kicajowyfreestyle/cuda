@@ -8,9 +8,19 @@ The repository above contains my first steps in CUDA.
  * stencil
  * reduce
 
+### How to use
+Reduce
+```bash
+./reduce <arraySize> <operation type>
+```
+Where allowed operation types are: min, max, sum
+
 ### TODO
+ * Map
+   * pass arguments by command line
+ * Stencil
+   * pass arguments by command line
  * Reduce:
-   * function to fill data to next power of two with neutral element
    * better division for reducing very big arrays (length>2^25)
  * General:
    * add some time measurement
