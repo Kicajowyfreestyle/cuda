@@ -28,10 +28,6 @@ Stencil
 Both sizes are n of n by n 2D arrays.
 
 ### TODO
- * Map
-   * pass arguments by command line
- * Stencil
-   * pass arguments by command line
  * Reduce:
    * better division for reducing very big arrays (length>2^25)
  * General:
