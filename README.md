@@ -21,6 +21,12 @@ Map
 ```
 Where allowed operation types are: log, square, exp, sqrt, mul <constant>.
 
+Stencil
+```bash
+./filter <arraySize> <filterSize>
+```
+Both sizes are n of n by n 2D arrays.
+
 ### TODO
  * Map
    * pass arguments by command line

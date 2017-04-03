@@ -1,14 +1,13 @@
 #include "filter.h"
 
 __global__
-void stencil(float *x, float *y, int xWidth, int xHeight, float *filter, int filterSize, float filterSum)
+void stencil(const float * const x, float * const y, const int xWidth, const int xHeight, const float * const filter, const int filterSize, const float filterSum)
 {
   int posX = blockIdx.x*blockDim.x + threadIdx.x;
   int posY = blockIdx.y*blockDim.y + threadIdx.y;
   //y[posY*xWidth+posX] = x[posY*xWidth+posX];
   float sum = 0.0;
   float subFromSum = 0.0;
-  float subFromSumPrev = 0.0;
   int range = filterSize/2;
   for(int i=-range; i<=range; i++){
     for(int k=-range; k<=range; k++){
@@ -28,7 +27,8 @@ void stencil(float *x, float *y, int xWidth, int xHeight, float *filter, int fil
 }
 
 template<typename A>
-void transform2Dto1D(A** arr, A* target, int width, int height){
+void transform2Dto1D(A** const arr, A* const target, const int width, const int height)
+{
   for(int i=0; i<width; i++){
     for(int k=0; k<height; k++){
       target[i*width+k] = arr[i][k];
@@ -37,7 +37,8 @@ void transform2Dto1D(A** arr, A* target, int width, int height){
 }
 
 template<typename A>
-void transform1Dto2D(A* arr, A** target, int width, int height){
+void transform1Dto2D(A* const arr, A** const target, const int width, const int height)
+{
   for(int i=0; i<width; i++){
     for(int k=0; k<height; k++){
       target[i][k] = arr[i*width+k];
@@ -46,7 +47,8 @@ void transform1Dto2D(A* arr, A** target, int width, int height){
 }
 
 
-void cudaSquareFilter(float **x, int xWidth, int xHeight, float **filter, int filterSize){
+void cudaSquareFilter(float ** const x, const int xWidth, const int xHeight, float ** const filter, const int filterSize)
+{
     float *d_x, *d_y, *d_filter, *result, *xTransformed, *filterTransformed;
 
     cudaMalloc(&d_x, xWidth*xHeight*sizeof(float));

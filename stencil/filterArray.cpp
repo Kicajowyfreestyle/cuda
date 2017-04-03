@@ -3,13 +3,14 @@
 #include <ctime>
 #include "filter.h"
 
-int main(void)
+int main(int argc, char* argv[])
 {
   // generate randomness
   srand(time(NULL));
 
   float **h_x, **filter;
-  int N=4, filterSize=3;
+  int N          = (argc>1) ? atoi(argv[1]) : 4;
+  int filterSize = (argc>2) ? atoi(argv[2]) : 3;
 
   // allocate memory on host
   h_x = (float**)malloc(N*sizeof(float*));

@@ -2,12 +2,12 @@
 #include <stdio.h>
 
 __global__
-void stencil(float *x, float *y, int xWidth, int xHeight, float *filter, int filterSize, float filterSum);
+void stencil(const float * const x, float * const y, const int xWidth, const int xHeight, const float * const filter, const int filterSize, const float filterSum);
 
-void cudaSquareFilter(float **x, int xWidth, int xHeight, float **filter, int filterSize);
-
-template<typename A>
-void transform2Dto1D(A** arr, A* target, int width, int height);
+void cudaSquareFilter(float ** const x, const int xWidth, const int xHeight, float ** const filter, const int filterSize);
 
 template<typename A>
-void transform1Dto2D(A* arr, A** target, int width, int height);
+void transform2Dto1D(A** const arr, A* target, const int width, const int height);
+
+template<typename A>
+void transform1Dto2D(A* arr, A** target, const int width, const int height);

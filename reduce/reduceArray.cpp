@@ -9,8 +9,8 @@ int main(int argc, char* argv[])
   srand(time(NULL));
 
   float *h_x;
-  long long int N=atoi(argv[1]);
-  std::string op = argv[2];
+  long long int N = (argc>1) ? atoi(argv[1]) : 128;
+  std::string op  = (argc>2) ? argv[2] : "sum";
 
   // allocate memory on host
   h_x = (float*)malloc(N*sizeof(float));
