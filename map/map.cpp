@@ -1,41 +1,41 @@
 #include "map.h"
 
 __global__
-void mapLog(float *x, float *y)
+void mapLog(const float * const x, float * const y)
 {
   int i = blockIdx.x*blockDim.x + threadIdx.x;
   y[i] = log(x[i]);
 }
 
 __global__
-void mapSquare(float *x, float *y)
+void mapSquare(const float * const x, float * const y)
 {
   int i = blockIdx.x*blockDim.x + threadIdx.x;
   y[i] = x[i]*x[i];
 }
 
 __global__
-void mapSqrt(float *x, float *y)
+void mapSqrt(const float * const x, float * const y)
 {
   int i = blockIdx.x*blockDim.x + threadIdx.x;
   y[i] = sqrt(x[i]);
 }
 
 __global__
-void mapExp(float *x, float *y)
+void mapExp(const float * const x, float * const y)
 {
   int i = blockIdx.x*blockDim.x + threadIdx.x;
   y[i] = exp(x[i]);
 }
 
 __global__
-void mapMul(float *x, float *y, const int multiplier)
+void mapMul(const float * const x, float * const y, const float multiplier)
 {
   int i = blockIdx.x*blockDim.x + threadIdx.x;
   y[i] = x[i] * multiplier;
 }
 
-void cudaMap(float *x, int n, std::string functionName, float multiplier){
+void cudaMap(float * x, const int n, const std::string functionName, const float multiplier){
     float *d_x, *d_y;
     // allocate memory on device
     cudaMalloc(&d_x, n*sizeof(float));

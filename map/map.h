@@ -2,18 +2,18 @@
 #include <iostream>
 
 __global__
-void mapLog(float *x, float *y);
+void mapLog(const float * const x, float * const y);
 
 __global__
-void mapSquare(float *x, float *y);
+void mapSquare(const float * const x, float * const y);
 
 __global__
-void mapExp(float *x, float *y);
+void mapExp(const float * const x, float * const y);
 
 __global__
-void mapSqrt(float *x, float *y);
+void mapSqrt(const float * const x, float * const y);
 
 __global__
-void mapMul(float *x, float *y, const int multiplier);
+void mapMul(const float * const x, float * const y, const float multiplier);
 
-void cudaMap(float *x, int n, std::string functionName, float multiplier=1.0);
+void cudaMap(float *x, const int n, const std::string functionName, const float multiplier=1.0);

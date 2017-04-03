@@ -3,13 +3,15 @@
 #include <ctime>
 #include "map.h"
 
-int main(void)
+int main(int argc, char* argv[])
 {
   // generate randomness
   srand(time(NULL));
 
   float *h_x;
-  int N=1024;
+  int N=atoi(argv[1]);
+  std::string op = argv[2];
+  float multiplier = (argc>3)?atof(argv[3]):1.0;
 
   // allocate memory on host
   h_x = (float*)malloc(N*sizeof(float));
@@ -21,7 +23,7 @@ int main(void)
   }
 
   // map function
-  cudaMap(h_x, N, "log");
+  cudaMap(h_x, N, op, multiplier);
 
   // show results
   for (int i = 0; i < N; i++) {

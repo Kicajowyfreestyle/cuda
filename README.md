@@ -15,6 +15,12 @@ Reduce
 ```
 Where allowed operation types are: min, max, sum
 
+Map
+```bash
+./map <arraySize> <operation type>
+```
+Where allowed operation types are: log, square, exp, sqrt, mul <constant>.
+
 ### TODO
  * Map
    * pass arguments by command line
